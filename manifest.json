@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Emote Wheel Shortcut",
+    "name": "Shortcut Wheel",
     "version": "1.0",
     "description": "Custom shortcut wheel with game-style UI",
     "permissions": [
