@@ -27,7 +27,7 @@ function createEmoteWheel() {
     transform: translate(-50%, -50%);
     width: 300px;
     height: 300px;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0);
     border-radius: 50%;
     z-index: 9999;
     display: flex;
@@ -36,12 +36,76 @@ function createEmoteWheel() {
     color: white;
   `;
   emoteWheel.innerHTML = `
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; width: 100%; height: 100%;">
-      <div style="grid-column: 2; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;">Top</div>
-      <div style="grid-column: 1; grid-row: 2; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;">Left</div>
-      <div style="grid-column: 3; grid-row: 2; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;">Right</div>
-      <div style="grid-column: 2; grid-row: 3; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center;">Bottom</div>
-      <div style="grid-column: 2; grid-row: 2; background: rgba(255,255,255,0.2); display: flex; justify-content: center; align-items: center;">Center</div>
+    <div style="
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      grid-template-rows: 1fr 1fr; 
+      width: 100%; 
+      height: 100%;
+      transform: rotate(45deg);
+    ">
+      <div class="shortcut" style="grid-column: 1;
+        background: rgba(255,255,255,0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-top-left-radius: 100%;
+        border-bottom: 3px solid rgb(75, 75, 75);
+        border-right: 3px solid rgb(75, 75, 75)">
+          <span style="
+            transform: rotate(-45deg);">Top</span></div>
+
+      <div class="shortcut" style="grid-column: 2;
+        grid-row: 1;
+        background: rgba(255,255,255,0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-top-right-radius: 100%;
+        border-left: 3px solid rgb(75, 75, 75);
+        border-bottom: 3px solid rgb(75, 75, 75)">
+          <span style="
+            transform: rotate(-45deg);">Right</span></div>
+
+      <div class="shortcut" style="grid-column: 1;
+        grid-row: 2;
+        background: rgba(255,255,255,0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-bottom-left-radius: 100%;
+        border-right: 3px solid rgb(75, 75, 75);
+        border-top: 3px solid rgb(75, 75, 75)">
+          <span style="
+            transform: rotate(-45deg);">Left</span></div>
+
+      <div class="shortcut" style="grid-column: 2;
+        grid-row: 2;
+        background: rgba(255,255,255,0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-bottom-right-radius: 100%;
+        border-top: 3px solid rgb(75, 75, 75);
+        border-left: 3px solid rgb(75, 75, 75)">
+          <span style="
+            transform: rotate(-45deg);">Bottom</span></div>
+
+      <div class="shortcut" style="
+        z-index: 9999;
+        position: absolute;
+        top: 40%;
+        left: 40%;
+        height: 60px;
+        width: 60px;
+        background: rgb(40, 42, 48);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 100%;
+        border: 5px solid rgb(75, 75, 75);">
+          <span style="
+            transform: rotate(-45deg);">Center</span></div>
     </div>
   `;
   document.body.appendChild(emoteWheel);
