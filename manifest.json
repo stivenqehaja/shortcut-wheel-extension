@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "Emote Wheel Shortcut",
+    "version": "1.0",
+    "description": "Custom shortcut wheel with game-style UI",
+    "permissions": [
+      "activeTab",
+      "storage"
+    ],
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"]
+      }
+    ]
+  }
