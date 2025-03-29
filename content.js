@@ -1,26 +1,35 @@
 console.log("ShiftY Logger content script loaded!"); // Debugging log
 
-let emoteWheel = null;
+// CONSTANTS
+let shortcutWheel = null;
+let shortcuts = null;
+
+let lastActiveShortcutId = null;
+let activeShortcutId = "center";
 let isWheelActive = false;
 let mouseX = 0;
 let mouseY = 0;
+const styleNormalColor = "rgb(40, 42, 48)";
+const styleHoverColor = "rgb(108, 108, 108)";
+const styleBorderColor = "rgb(75, 75, 75)";
+
 
 // Track mouse position
-document.addEventListener('mousemove', (event) => {
+document.addEventListener("mousemove", (event) => {
   mouseX = event.clientX;
   mouseY = event.clientY;
 });
 
 function createEmoteWheel() {
   // Remove existing wheel if it exists
-  if (document.querySelector('.emote-wheel')) {
-    document.querySelector('.emote-wheel').remove();
+  if (document.querySelector(".emote-wheel")) {
+    document.querySelector(".emote-wheel").remove();
   }
 
   // Create wheel element
-  emoteWheel = document.createElement('div');
-  emoteWheel.className = 'emote-wheel';
-  emoteWheel.style.cssText = `
+  shortcutWheel = document.createElement("div");
+  shortcutWheel.className = "emote-wheel";
+  shortcutWheel.style.cssText = `
     position: fixed;
     top: ${mouseY}px;
     left: ${mouseX}px;
@@ -36,7 +45,7 @@ function createEmoteWheel() {
     color: white;
     user-select: none;
   `;
-  emoteWheel.innerHTML = `
+  shortcutWheel.innerHTML = `
     <div style="
       display: grid; 
       grid-template-columns: 1fr 1fr; 
@@ -48,13 +57,13 @@ function createEmoteWheel() {
       <div class="shortcut" id="top"
         style="
           grid-column: 1;
-          background: rgb(40, 42, 48);
+          background: ${styleNormalColor};
           display: flex;
           justify-content: center;
           align-items: center;
           border-top-left-radius: 100%;
-          border-bottom: 3px solid rgb(75, 75, 75);
-          border-right: 3px solid rgb(75, 75, 75)">
+          border-bottom: 3px solid ${styleBorderColor};
+          border-right: 3px solid ${styleBorderColor}">
             <span style="transform: rotate(-45deg);">Top</span>
       </div>
 
@@ -62,13 +71,13 @@ function createEmoteWheel() {
         style="
           grid-column: 2;
           grid-row: 1;
-          background: rgb(40, 42, 48);
+          background: ${styleNormalColor};
           display: flex;
           justify-content: center;
           align-items: center;
           border-top-right-radius: 100%;
-          border-left: 3px solid rgb(75, 75, 75);
-          border-bottom: 3px solid rgb(75, 75, 75)">
+          border-left: 3px solid ${styleBorderColor};
+          border-bottom: 3px solid ${styleBorderColor}">
             <span style="transform: rotate(-45deg);">Right</span>
       </div>
 
@@ -76,13 +85,13 @@ function createEmoteWheel() {
         style="
           grid-column: 1;
           grid-row: 2;
-          background: rgb(40, 42, 48);
+          background: ${styleNormalColor};
           display: flex;
           justify-content: center;
           align-items: center;
           border-bottom-left-radius: 100%;
-          border-right: 3px solid rgb(75, 75, 75);
-          border-top: 3px solid rgb(75, 75, 75)">
+          border-right: 3px solid ${styleBorderColor};
+          border-top: 3px solid ${styleBorderColor}">
             <span style=" transform: rotate(-45deg);">Left</span>
       </div>
 
@@ -90,13 +99,13 @@ function createEmoteWheel() {
         style="
           grid-column: 2;
           grid-row: 2;
-          background: rgb(40, 42, 48);
+          background: ${styleNormalColor};
           display: flex;
           justify-content: center;
           align-items: center;
           border-bottom-right-radius: 100%;
-          border-top: 3px solid rgb(75, 75, 75);
-          border-left: 3px solid rgb(75, 75, 75)">
+          border-top: 3px solid ${styleBorderColor};
+          border-left: 3px solid ${styleBorderColor}">
             <span style="transform: rotate(-45deg);">Bottom</span>
       </div>
 
@@ -108,60 +117,75 @@ function createEmoteWheel() {
           left: 40%;
           height: 60px;
           width: 60px;
-          background: rgb(40, 42, 48);
+          background: ${styleNormalColor};
           display: flex;
           justify-content: center;
           align-items: center;
           border-radius: 100%;
-          border: 5px solid rgb(75, 75, 75);">
+          border: 5px solid ${styleBorderColor};">
             <span style="transform: rotate(-45deg);">Cancel</span>
         </div>
     </div>
   `;
-  document.body.appendChild(emoteWheel);
+  document.body.appendChild(shortcutWheel);
 }
 
 function removeEmoteWheel() {
-  if (emoteWheel) {
-    emoteWheel.remove();
-    emoteWheel = null;
+  if (shortcutWheel) {
+    shortcutWheel.remove();
+    shortcutWheel = null;
   }
 }
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "F24" || event.key === "F7") {
+  if (
+    event.key === "F24" ||
+    event.key === "F7" ||
+    (event.key === "Shift" &&
+      event.location === KeyboardEvent.DOM_KEY_LOCATION_RIGHT)
+  ) {
     if (!isWheelActive) {
       console.log("Emote Wheel Activated");
       createEmoteWheel();
-
-      const emoteWheel = document.querySelector('.emote-wheel');
       
-      if (!emoteWheel) {
+      // Assign Wheel [*]]
+      shortcutWheel = document.querySelector(".emote-wheel");
+
+      if (!shortcutWheel) {
         console.error("Element '.emote-wheel' not found!");
         return;
       }
+      isWheelActive = true;
 
-      const shortcuts = emoteWheel.querySelectorAll('.shortcut');
+      // Assign SHortcuts [*]
+      shortcuts = shortcutWheel.querySelectorAll(".shortcut");
+      
       shortcuts.forEach((shortcut) => {
-        shortcut.addEventListener('mouseover', () => {
-          console.log('Inside ' + shortcut.id);
-          shortcut.style.backgroundColor = 'rgb(108, 108, 108)';
+        shortcut.addEventListener("mouseover", () => {
+          console.log("Inside " + shortcut.id);
+          lastActiveShortcutId = activeShortcutId;
+          activeShortcutId = shortcut.id;
+          shortcut.style.backgroundColor = styleHoverColor;
         });
 
-        isWheelActive = true;
-        shortcut.addEventListener('mouseleave', () => {
-          console.log('Outside ' + shortcut.id);
-          shortcut.style.backgroundColor = 'rgb(40, 42, 48)';
+        shortcut.addEventListener("mouseleave", () => {
+          console.log("Outside " + shortcut.id);
+          // shortcut.style.backgroundColor = styleNormalColor;
+          activeShortcutId = null;
+          highlightLastActiveShortcut(false);
+          shortcutWheel.addEventListener('mouseleave', () => {
+            console.log('Free Roam');
+            highlightLastActiveShortcut(true);
+          });
         });
 
-        shortcut.addEventListener('contextmenu', (event) => {
-          console.log('Right-Click on Active Wheel');
-          event.preventDefault();          
+        shortcut.addEventListener("contextmenu", (event) => {
+          console.log("Right-Click on Active Wheel");
+          event.preventDefault();
         });
       });
-      
-
     }
+    // DEVIDE SCREEN INTO COORDINATIVE AXIS FOR LASTHOVER TRIGGER
   } else if (isWheelActive) {
     // Deactivate if any other key is pressed
     console.log("Emote Wheel Deactivated (other key pressed)");
@@ -171,7 +195,12 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("keyup", (event) => {
-  if (event.key === "F24" || event.key === "F7") {
+  if (
+    event.key === "F24" ||
+    event.key === "F7" ||
+    (event.key === "Shift" &&
+      event.location === KeyboardEvent.DOM_KEY_LOCATION_RIGHT)
+  ) {
     console.log("Emote Wheel Deactivated (F24 released)");
     removeEmoteWheel();
     isWheelActive = false;
@@ -187,8 +216,24 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("click", (event) => {
-  if (isWheelActive && emoteWheel && !emoteWheel.contains(event.target)) {
+  if (isWheelActive && shortcutWheel) {
     removeEmoteWheel();
     isWheelActive = false;
   }
-}); 
+});
+
+function highlightLastActiveShortcut(isShortcutWheelEntry) {
+  shortcuts.forEach((shortcut) => {
+    shortcut.style.backgroundColor = styleNormalColor;
+  });
+
+  if(activeShortcutId !== null) {
+    const activeShortcutFx = document.querySelector(`#${activeShortcutId}`);
+    activeShortcutFx.style.backgroundColor = styleHoverColor;
+    console.log("Last Element : " + activeShortcutId);
+  }
+  if(isShortcutWheelEntry && lastActiveShortcutId !== null) {
+    const lastActiveShortcutFx = document.querySelector(`#${lastActiveShortcutId}`);
+    lastActiveShortcutFx.style.backgroundColor = styleHoverColor;
+  }
+}
