@@ -4,11 +4,15 @@ console.log("ShiftY Logger content script loaded!"); // Debugging log
 let shortcutWheel = null;
 let shortcuts = null;
 
-let lastActiveShortcutId = null;
 let activeShortcutId = "center";
 let isWheelActive = false;
 let mouseX = 0;
 let mouseY = 0;
+
+let wheelX = 0;
+let wheelY = 0;
+let isInitialPosition = true;
+
 const styleNormalColor = "rgb(40, 42, 48)";
 const styleHoverColor = "rgb(108, 108, 108)";
 const styleBorderColor = "rgb(75, 75, 75)";
@@ -155,28 +159,15 @@ document.addEventListener("keydown", (event) => {
         console.error("Element '.emote-wheel' not found!");
         return;
       }
-      isWheelActive = true;
+      isWheelActive = true;  
 
       // Assign SHortcuts [*]
       shortcuts = shortcutWheel.querySelectorAll(".shortcut");
-      
+
       shortcuts.forEach((shortcut) => {
         shortcut.addEventListener("mouseover", () => {
-          console.log("Inside " + shortcut.id);
-          lastActiveShortcutId = activeShortcutId;
           activeShortcutId = shortcut.id;
           shortcut.style.backgroundColor = styleHoverColor;
-        });
-
-        shortcut.addEventListener("mouseleave", () => {
-          console.log("Outside " + shortcut.id);
-          // shortcut.style.backgroundColor = styleNormalColor;
-          activeShortcutId = null;
-          highlightLastActiveShortcut(false);
-          shortcutWheel.addEventListener('mouseleave', () => {
-            console.log('Free Roam');
-            highlightLastActiveShortcut(true);
-          });
         });
 
         shortcut.addEventListener("contextmenu", (event) => {
@@ -185,12 +176,40 @@ document.addEventListener("keydown", (event) => {
         });
       });
     }
-    // DEVIDE SCREEN INTO COORDINATIVE AXIS FOR LASTHOVER TRIGGER
   } else if (isWheelActive) {
     // Deactivate if any other key is pressed
     console.log("Emote Wheel Deactivated (other key pressed)");
     removeEmoteWheel();
     isWheelActive = false;
+  }
+});
+// Track mouse position
+document.addEventListener('mousemove', (event) => {
+  if(isWheelActive) { 
+    const centerShorctut = document.querySelector('#center');
+    if(isInitialPosition){
+      wheelX = event.clientX;
+      wheelY = event.clientY;
+
+      isInitialPosition = false;
+    }
+     if(!centerShorctut.contains(event.target)){
+         mouseX = event.clientX;
+        mouseY = event.clientY;
+        
+        var deltaX = wheelX-mouseX;
+        var deltaY = wheelY-mouseY;
+
+      if(deltaY >= deltaX && deltaY >= -deltaX){ activeShortcutId = 'top'; }
+      else if(deltaY > deltaX && deltaY < -deltaX){ activeShortcutId = 'right'; }
+      else if(deltaY <= deltaX && deltaY <= -deltaX){ activeShortcutId = 'bottom'; }
+      else if(deltaY < deltaX && deltaY > -deltaX){ activeShortcutId = 'left'; }
+      highlightLastActiveShortcut();
+    }
+    else{
+      activeShortcutId = 'center';
+      highlightLastActiveShortcut();
+    }
   }
 });
 
@@ -204,6 +223,7 @@ document.addEventListener("keyup", (event) => {
     console.log("Emote Wheel Deactivated (F24 released)");
     removeEmoteWheel();
     isWheelActive = false;
+    isInitialPosition = true;
   }
 });
 
@@ -222,7 +242,7 @@ document.addEventListener("click", (event) => {
   }
 });
 
-function highlightLastActiveShortcut(isShortcutWheelEntry) {
+function highlightLastActiveShortcut() {
   shortcuts.forEach((shortcut) => {
     shortcut.style.backgroundColor = styleNormalColor;
   });
@@ -230,10 +250,10 @@ function highlightLastActiveShortcut(isShortcutWheelEntry) {
   if(activeShortcutId !== null) {
     const activeShortcutFx = document.querySelector(`#${activeShortcutId}`);
     activeShortcutFx.style.backgroundColor = styleHoverColor;
-    console.log("Last Element : " + activeShortcutId);
+    console.log("Element : " + activeShortcutId);
   }
-  if(isShortcutWheelEntry && lastActiveShortcutId !== null) {
-    const lastActiveShortcutFx = document.querySelector(`#${lastActiveShortcutId}`);
-    lastActiveShortcutFx.style.backgroundColor = styleHoverColor;
-  }
+}
+
+function keyNavigator() {
+
 }
