@@ -1,16 +1,21 @@
 {
-    "manifest_version": 3,
-    "name": "Shortcut Wheel",
-    "version": "1.0",
-    "description": "Custom shortcut wheel with game-style UI",
-    "permissions": [
-      "activeTab",
-      "storage"
-    ],
-    "content_scripts": [
-      {
-        "matches": ["<all_urls>"],
-        "js": ["content.js"]
-      }
-    ]
+  "manifest_version": 3,
+  "name": "Shortcut Wheel",
+  "version": "1.0",
+  "description": "Custom shortcut wheel with tab and DevTools controls",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "debugger"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
   }
+}

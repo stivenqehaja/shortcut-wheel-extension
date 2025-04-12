@@ -1,4 +1,4 @@
-console.log("ShiftY Logger content script loaded!"); // Debugging log
+console.log("ShiftY Logger content script loaded!");
 
 // CONSTANTS
 let shortcutWheel = null;
@@ -16,7 +16,6 @@ let isInitialPosition = true;
 const styleNormalColor = "rgb(40, 42, 48)";
 const styleHoverColor = "rgb(108, 108, 108)";
 const styleBorderColor = "rgb(75, 75, 75)";
-
 
 // Track mouse position
 document.addEventListener("mousemove", (event) => {
@@ -58,9 +57,10 @@ function createEmoteWheel() {
       height: 100%;
       transform: rotate(45deg);
     ">
-      <div class="shortcut" id="top"
+      <div class="shortcut" id="duplicate-tab"
         style="
           grid-column: 1;
+          grid-row: 1;
           background: ${styleNormalColor};
           display: flex;
           justify-content: center;
@@ -68,10 +68,10 @@ function createEmoteWheel() {
           border-top-left-radius: 100%;
           border-bottom: 3px solid ${styleBorderColor};
           border-right: 3px solid ${styleBorderColor}">
-            <span style="transform: rotate(-45deg);">Top</span>
+            <span style="transform: rotate(-45deg);">Duplicate</span>
       </div>
 
-      <div class="shortcut" id="right"
+      <div class="shortcut" id="next-tab"
         style="
           grid-column: 2;
           grid-row: 1;
@@ -82,10 +82,10 @@ function createEmoteWheel() {
           border-top-right-radius: 100%;
           border-left: 3px solid ${styleBorderColor};
           border-bottom: 3px solid ${styleBorderColor}">
-            <span style="transform: rotate(-45deg);">Right</span>
+            <span style="transform: rotate(-45deg);">Next Tab</span>
       </div>
 
-      <div class="shortcut" id="left"
+      <div class="shortcut" id="prev-tab"
         style="
           grid-column: 1;
           grid-row: 2;
@@ -96,10 +96,10 @@ function createEmoteWheel() {
           border-bottom-left-radius: 100%;
           border-right: 3px solid ${styleBorderColor};
           border-top: 3px solid ${styleBorderColor}">
-            <span style=" transform: rotate(-45deg);">Left</span>
+            <span style="transform: rotate(-45deg);">Prev Tab</span>
       </div>
 
-      <div class="shortcut" id="bottom"
+      <div class="shortcut" id="devtools"
         style="
           grid-column: 2;
           grid-row: 2;
@@ -110,7 +110,7 @@ function createEmoteWheel() {
           border-bottom-right-radius: 100%;
           border-top: 3px solid ${styleBorderColor};
           border-left: 3px solid ${styleBorderColor}">
-            <span style="transform: rotate(-45deg);">Bottom</span>
+            <span style="transform: rotate(-45deg);">DevTools</span>
       </div>
 
       <div class="shortcut" id="center"
@@ -141,6 +141,29 @@ function removeEmoteWheel() {
   }
 }
 
+// Handle wheel actions
+function handleWheelAction(action) {
+  switch(action) {
+    case 'prev-tab':
+      chrome.runtime.sendMessage({ action: 'prev_tab' });
+      break;
+    case 'next-tab':
+      chrome.runtime.sendMessage({ action: 'next_tab' });
+      break;
+    case 'duplicate-tab':
+      chrome.runtime.sendMessage({ action: 'duplicate_tab' });
+      break;
+    case 'devtools':
+      chrome.runtime.sendMessage({ action: 'toggle_devtools' });
+      break;
+    case 'center':
+      // Cancel action - do nothing
+      break;
+  }
+  removeEmoteWheel();
+  isWheelActive = false;
+}
+
 document.addEventListener("keydown", (event) => {
   if (
     event.key === "F24" ||
@@ -149,41 +172,40 @@ document.addEventListener("keydown", (event) => {
       event.location === KeyboardEvent.DOM_KEY_LOCATION_RIGHT)
   ) {
     if (!isWheelActive) {
-      console.log("Emote Wheel Activated");
+      console.log("Shortcut Wheel Activated");
       createEmoteWheel();
       
-      // Assign Wheel [*]]
       shortcutWheel = document.querySelector(".emote-wheel");
-
       if (!shortcutWheel) {
         console.error("Element '.emote-wheel' not found!");
         return;
       }
       isWheelActive = true;  
+      isInitialPosition = true;
 
-      // Assign SHortcuts [*]
       shortcuts = shortcutWheel.querySelectorAll(".shortcut");
-
       shortcuts.forEach((shortcut) => {
         shortcut.addEventListener("mouseover", () => {
           activeShortcutId = shortcut.id;
-          shortcut.style.backgroundColor = styleHoverColor;
+          highlightLastActiveShortcut();
+        });
+
+        shortcut.addEventListener("click", () => {
+          handleWheelAction(shortcut.id);
         });
 
         shortcut.addEventListener("contextmenu", (event) => {
-          console.log("Right-Click on Active Wheel");
           event.preventDefault();
         });
       });
     }
   } else if (isWheelActive) {
-    // Deactivate if any other key is pressed
-    console.log("Emote Wheel Deactivated (other key pressed)");
     removeEmoteWheel();
     isWheelActive = false;
   }
 });
-// Track mouse position
+
+// Track mouse position for wheel navigation
 document.addEventListener('mousemove', (event) => {
   if(isWheelActive) { 
     const centerShorctut = document.querySelector('#center');
@@ -200,10 +222,10 @@ document.addEventListener('mousemove', (event) => {
         var deltaX = wheelX-mouseX;
         var deltaY = wheelY-mouseY;
 
-      if(deltaY >= deltaX && deltaY >= -deltaX){ activeShortcutId = 'top'; }
-      else if(deltaY > deltaX && deltaY < -deltaX){ activeShortcutId = 'right'; }
-      else if(deltaY <= deltaX && deltaY <= -deltaX){ activeShortcutId = 'bottom'; }
-      else if(deltaY < deltaX && deltaY > -deltaX){ activeShortcutId = 'left'; }
+      if(deltaY >= deltaX && deltaY >= -deltaX){ activeShortcutId = 'duplicate-tab'; } // Top
+      else if(deltaY > deltaX && deltaY < -deltaX){ activeShortcutId = 'next-tab'; } // Right
+      else if(deltaY <= deltaX && deltaY <= -deltaX){ activeShortcutId = 'devtools'; } // Bottom
+      else if(deltaY < deltaX && deltaY > -deltaX){ activeShortcutId = 'prev-tab'; } // Left
       highlightLastActiveShortcut();
     }
     else{
@@ -220,14 +242,14 @@ document.addEventListener("keyup", (event) => {
     (event.key === "Shift" &&
       event.location === KeyboardEvent.DOM_KEY_LOCATION_RIGHT)
   ) {
-    console.log("Emote Wheel Deactivated (F24 released)");
-    removeEmoteWheel();
-    isWheelActive = false;
-    isInitialPosition = true;
+    if (isWheelActive) {
+      console.log("Executing action:", activeShortcutId);
+      handleWheelAction(activeShortcutId);
+    }
   }
 });
 
-// Optional: Close wheel when clicking outside or pressing Escape
+// Close wheel when pressing Escape
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && isWheelActive) {
     removeEmoteWheel();
@@ -235,25 +257,18 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-document.addEventListener("click", (event) => {
-  if (isWheelActive && shortcutWheel) {
-    removeEmoteWheel();
-    isWheelActive = false;
-  }
-});
-
 function highlightLastActiveShortcut() {
+  if (!shortcuts) return;
+  
   shortcuts.forEach((shortcut) => {
     shortcut.style.backgroundColor = styleNormalColor;
   });
 
   if(activeShortcutId !== null) {
     const activeShortcutFx = document.querySelector(`#${activeShortcutId}`);
-    activeShortcutFx.style.backgroundColor = styleHoverColor;
-    console.log("Element : " + activeShortcutId);
+    if (activeShortcutFx) {
+      activeShortcutFx.style.backgroundColor = styleHoverColor;
+      console.log("Active element:", activeShortcutId);
+    }
   }
-}
-
-function keyNavigator() {
-
 }
