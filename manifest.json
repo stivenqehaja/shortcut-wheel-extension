@@ -5,7 +5,6 @@
   "description": "Custom shortcut wheel with tab and DevTools controls",
   "permissions": [
     "activeTab",
-    "storage",
     "tabs",
     "debugger"
   ],

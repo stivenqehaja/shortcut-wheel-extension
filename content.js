@@ -99,7 +99,7 @@ function createEmoteWheel() {
             <span style="transform: rotate(-45deg);">Prev Tab</span>
       </div>
 
-      <div class="shortcut" id="devtools"
+      <div class="shortcut" id="reopen_tab"
         style="
           grid-column: 2;
           grid-row: 2;
@@ -110,7 +110,7 @@ function createEmoteWheel() {
           border-bottom-right-radius: 100%;
           border-top: 3px solid ${styleBorderColor};
           border-left: 3px solid ${styleBorderColor}">
-            <span style="transform: rotate(-45deg);">DevTools</span>
+            <span style="transform: rotate(-45deg);">ReopenTab</span>
       </div>
 
       <div class="shortcut" id="center"
@@ -153,8 +153,8 @@ function handleWheelAction(action) {
     case 'duplicate-tab':
       chrome.runtime.sendMessage({ action: 'duplicate_tab' });
       break;
-    case 'devtools':
-      chrome.runtime.sendMessage({ action: 'toggle_devtools' });
+    case 'reopen_tab':
+      chrome.runtime.sendMessage({ action: 'reopen_tab' });
       break;
     case 'center':
       // Cancel action - do nothing
@@ -224,7 +224,7 @@ document.addEventListener('mousemove', (event) => {
 
       if(deltaY >= deltaX && deltaY >= -deltaX){ activeShortcutId = 'duplicate-tab'; } // Top
       else if(deltaY > deltaX && deltaY < -deltaX){ activeShortcutId = 'next-tab'; } // Right
-      else if(deltaY <= deltaX && deltaY <= -deltaX){ activeShortcutId = 'devtools'; } // Bottom
+      else if(deltaY <= deltaX && deltaY <= -deltaX){ activeShortcutId = 'reopen_tab'; } // Bottom
       else if(deltaY < deltaX && deltaY > -deltaX){ activeShortcutId = 'prev-tab'; } // Left
       highlightLastActiveShortcut();
     }
